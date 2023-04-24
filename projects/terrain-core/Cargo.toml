@@ -10,10 +10,13 @@ license = "MPL-2.0"
 edition = "2021"
 
 [dependencies]
-shape-core = "0.1.14"
-shape-triangulation = { version = "0.1.1", features = ["rand"] }
+serde = { version = "1.0.130", features = ["derive"], optional = true }
+rand = { version = "0.8.4", features = ["small_rng"] }
+ndarray = { version = "0.15.6" }
+
 
 [dev-dependencies]
 
 [features]
 default = []
+serde = ["dep:serde", "ndarray/serde"]
