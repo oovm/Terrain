@@ -1,6 +1,9 @@
 use rand::distributions::uniform::SampleRange;
+use std::ops::Range;
+use ndarray::Array2;
+use rand::rngs::SmallRng;
+use rand::{Rng, SeedableRng};
 use super::*;
-
 #[derive(Debug)]
 pub struct DiamondSquare {
     pub width: usize,
@@ -38,8 +41,6 @@ impl DiamondSquare {
         for x in (0..h).step_by(step) {
             for y in (0..w).step_by(step) {
                 let value = rng.gen_range(self.range.start..self.range.end);
-                range.start = range.start.min(value);
-                range.end = range.end.max(value);
                 grid[[x, y]] = value;
             }
         }
@@ -80,7 +81,6 @@ impl DiamondSquare {
         }
         GridTerrain { grid, range }
     }
-
     pub fn random_average(&self, rng: &mut SmallRng, vs: [f32; 4]) -> f32 {
         let avg = vs.iter().sum::<f32>() / 4.0;
         let r_roughness = self.roughness.recip();
