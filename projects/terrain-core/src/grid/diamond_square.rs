@@ -43,11 +43,10 @@ impl DiamondSquare {
             }
         }
         for iteration in 0..self.iteration {
-            step /= 2;
-            println!("Iteration: {}, step_x: {}, step_y: {}", 1 + self.iteration - iteration.ilog2(), step, step);
+            println!("Iteration: {}, step: {}", iteration + 1, step);
             // Diamond step
-            for i in (1..=grid_h).step_by(step).map(|i|i - 1) {
-                for j in (1..=grid_w).step_by(step).map(|j| j - 1) {
+            for i in (0..grid_h).step_by(step).map(|i| i.saturating_sub(1)) {
+                for j in (0..grid_w).step_by(step).map(|j| j.saturating_sub(1)) {
                     let lu = grid[[i, j]];
                     let ru = grid[[i, j + step]];
                     let ld = grid[[i + step, j]];
@@ -57,6 +56,19 @@ impl DiamondSquare {
                     grid[[i + step / 2, j + step / 2]] = value;
                 }
             }
+            // Square step rows
+            for i in (0..grid_h).step_by(step).map(|i| i.saturating_sub(1)) {
+                for j in (0..grid_w).step_by(step).map(|j| j.saturating_sub(1)) {
+                    let l = grid[[i, j]];
+                    let r = grid[[i, j + step % grid_w]];
+                    let u = grid[[i + step % grid_h, j]];
+                    let d = grid[[i + step % grid_h, j + step % grid_w]];
+                    let avg = (l + r + u + d) / 4.0;
+                    let value = avg + self.get_rough_rate(&mut rng);
+                    grid[[i + step / 2, j]] = value;
+                }
+            }
+            step /= 2;
         }
         GridTerrain { grid, range }
     }
@@ -64,5 +76,14 @@ impl DiamondSquare {
     pub fn get_rough_rate(&self, rng: &mut SmallRng) -> f32 {
         let r_roughness = self.roughness.recip();
         rng.gen_range(r_roughness..self.roughness)
+    }
+    pub fn is_corner(&self, i: usize, j: usize) -> bool {
+        let mut step = 2usize.pow(self.iteration);
+        let grid_w = step * self.width;
+        let grid_h = step * self.height;
+        (i == 0 && j == 0)
+            || (i == 0 && j == grid_w - 1)
+            || (i == grid_h - 1 && j == 0)
+            || (i == grid_h - 1 && j == grid_w - 1)
     }
 }
