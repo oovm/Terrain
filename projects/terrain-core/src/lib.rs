@@ -6,4 +6,4 @@ pub use errors::{Error, Result};
 
 
 
-pub use crate::grid::{GridTerrain, DiamondSquare};
+pub use crate::grid::{GridTerrain, diamond_square::DiamondSquare};
