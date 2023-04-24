@@ -1,5 +1,6 @@
 use crate::{DiamondSquare, GridTerrain};
 use diamond_square::MidpointDisplacement;
+use ndarray::Array2;
 
 impl From<DiamondSquare> for GridTerrain {
     fn from(value: DiamondSquare) -> Self {
@@ -7,18 +8,46 @@ impl From<DiamondSquare> for GridTerrain {
     }
 }
 
-impl GridTerrain {
-    pub fn midpoint_(config: &MidpointDisplacement) -> Self {
-        todo!()
-        // let grid = config.generate();
-        // let min = grid.iter().fold(f32::MAX, |acc, &x| acc.min(x));
-        // let max = grid.iter().fold(f32::MIN, |acc, &x| acc.max(x));
-        // GridTerrain {
-        //     grid,
-        //     range: min..max,
-        // }
+impl From<MidpointDisplacement> for GridTerrain {
+    fn from(value: MidpointDisplacement) -> Self {
+        GridTerrain::mid_point_displacement(&value)
     }
+}
 
+impl GridTerrain {
+    /// Generate a grid using diamond square algorithm
+    ///
+    /// # Arguments
+    ///
+    /// * `config`:
+    ///
+    /// returns: GridTerrain
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use diamond_square::DiamondSquare;
+    /// ```
+    pub fn mid_point_displacement(config: &MidpointDisplacement) -> Self {
+        let row0 = config.generate();
+        let grid = Array2::from_shape_fn((row0.len(), 1), |(x, _)| row0[x]);
+        let min = grid.iter().fold(f32::MAX, |acc, &x| acc.min(x));
+        let max = grid.iter().fold(f32::MIN, |acc, &x| acc.max(x));
+        GridTerrain { grid, range: min..max }
+    }
+    /// Generate a grid using diamond square algorithm
+    ///
+    /// # Arguments
+    ///
+    /// * `config`:
+    ///
+    /// returns: GridTerrain
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use diamond_square::DiamondSquare;
+    /// ```
     pub fn diamond_square(config: &DiamondSquare) -> Self {
         let grid = config.generate();
         let min = grid.iter().fold(f32::MAX, |acc, &x| acc.min(x));
