@@ -15,6 +15,11 @@ rand = { version = "0.8.4", features = ["small_rng"] }
 ndarray = { version = "0.15.6" }
 tracing = "0.1.37"
 
+
+[dependencies.diamond-square]
+version = "0.0.0"
+path = "../terrain-ds"
+
 [dev-dependencies]
 
 [features]

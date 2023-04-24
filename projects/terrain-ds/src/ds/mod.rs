@@ -1,16 +1,37 @@
-use rand::distributions::uniform::SampleRange;
 use std::ops::Range;
 use ndarray::Array2;
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
-use super::*;
-#[derive(Debug)]
+
+
+/// Generate a grid using diamond square algorithm
+///
+/// # Arguments
+///
+/// * `rng`:
+/// * `vs`:
+///
+/// returns: f32
+///
+/// # Examples
+///
+/// ```
+/// use ndarray::Array2;
+/// ```
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DiamondSquare {
+    /// Width of the grid
     pub width: usize,
+    /// Height of the grid
     pub height: usize,
+    /// Iteration of the algorithm
     pub iteration: u32,
+    /// Range of the random number
     pub range: Range<f32>,
+    /// Roughness of the grid
     pub roughness: f32,
+    /// Seed of the random number generator
     pub seed: u64,
 }
 
@@ -31,13 +52,26 @@ impl Default for DiamondSquare {
 }
 
 impl DiamondSquare {
-    pub fn generate(&self) -> GridTerrain {
+    /// Generate a grid using diamond square algorithm
+    ///
+    /// # Arguments
+    ///
+    /// * `rng`:
+    /// * `vs`:
+    ///
+    /// returns: f32
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use ndarray::Array2;
+    /// ```
+    pub fn generate(&self) -> Array2<f32> {
         let mut rng = SmallRng::seed_from_u64(self.seed);
         let mut step = 2usize.pow(self.iteration);
         let w = step * self.width + 1;
         let h = step * self.height + 1;
         let mut grid = Array2::zeros((w, h));
-        let mut range = self.range.clone();
         for x in (0..h).step_by(step) {
             for y in (0..w).step_by(step) {
                 let value = rng.gen_range(self.range.start..self.range.end);
@@ -79,9 +113,10 @@ impl DiamondSquare {
             }
             step /= 2;
         }
-        GridTerrain { grid, range }
+        grid
     }
-    pub fn random_average(&self, rng: &mut SmallRng, vs: [f32; 4]) -> f32 {
+
+    fn random_average(&self, rng: &mut SmallRng, vs: [f32; 4]) -> f32 {
         let avg = vs.iter().sum::<f32>() / 4.0;
         let r_roughness = self.roughness.recip();
         avg * rng.gen_range(r_roughness..self.roughness)

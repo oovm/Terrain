@@ -2,21 +2,21 @@
 name = "diamond-square"
 version = "0.0.0"
 authors = ["Aster <192607617@qq.com>"]
-description = "..."
-repository = "https://github.com/oovm/sub_projects"
-documentation = "https://docs.rs/sub_projects"
+description = "Generate heightmap using diamond-square algorithm"
+repository = "https://github.com/oovm/Terrain/tree/dev/projects/terrain-ds"
+documentation = "https://docs.rs/diamond-square"
 readme = "Readme.md"
 license = "MPL-2.0"
 edition = "2021"
 
 [dependencies]
-serde = { version = "1.0.130", features = ["derive"], optional = true }
-rand = { version = "0.8.4", features = ["small_rng"] }
-ndarray = { version = "0.15.6" }
 tracing = "0.1.37"
+ndarray = { version = "0.15.6" }
+rand = { version = "0.8.4", features = ["small_rng"] }
+serde = { version = "1.0.130", features = ["derive"], optional = true }
 
 [dev-dependencies]
 
 [features]
 default = []
-serde = ["dep:serde", "ndarray/serde"]
+serde = ["dep:serde"]

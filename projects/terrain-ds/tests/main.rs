@@ -3,4 +3,3 @@ fn ready() {
     println!("it works!")
 }
 
-mod grid;
