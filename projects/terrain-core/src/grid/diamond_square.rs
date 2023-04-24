@@ -1,3 +1,4 @@
+use rand::distributions::uniform::SampleRange;
 use super::*;
 
 #[derive(Debug)]
@@ -30,8 +31,8 @@ impl DiamondSquare {
     pub fn generate(&self) -> GridTerrain {
         let mut rng = SmallRng::seed_from_u64(self.seed);
         let mut step = 2usize.pow(self.iteration);
-        let w = step * self.width;
-        let h = step * self.height;
+        let w = step * self.width + 1;
+        let h = step * self.height + 1;
         let mut grid = Array2::zeros((w, h));
         let mut range = self.range.clone();
         for x in (0..h).step_by(step) {
@@ -43,70 +44,36 @@ impl DiamondSquare {
             }
         }
         for iteration in 0..self.iteration {
-            println!("Iteration: {}, step: {}", iteration + 1, step);
-            // Diamond step
-            for i in (0..h).step_by(step).map(|i| i.saturating_sub(1)) {
-                for j in (0..w).step_by(step).map(|j| j.saturating_sub(1)) {
-                    let lu = grid[[i, j]];
-                    let ru = grid[[i, j + step]];
-                    let ld = grid[[i + step, j]];
-                    let rd = grid[[i + step, j + step]];
-                    let avg = (lu + ru + ld + rd) / 4.0;
-                    let value = avg + self.get_rough_rate(&mut rng);
-                    grid[[i + step / 2, j + step / 2]] = value;
+            println!("Iteration: {}, step: {} in ({}, {})", iteration + 1, step, w, h);
+            // diamond step
+            let half = step / 2;
+            for i in (half..h).step_by(step) {
+                for j in (half..w).step_by(step) {
+                    let lu = grid[[i - half, j - half]];
+                    let ru = grid[[i - half, j + half]];
+                    let ld = grid[[i + half, j - half]];
+                    let rd = grid[[i + half, j + half]];
+                    grid[[i, j]] = self.random_average(&mut rng, [lu, ru, ld, rd]);
                 }
             }
             // square step even rows
-            let half = step / 2;
             for i in (half..w).step_by(step) {
                 for j in (0..h).step_by(step) {
-                    let mut sum = 0.0;
-                    let mut count = 0;
-                    if i >= half {
-                        sum += grid[[i - half, j]];
-                        count += 1;
-                    }
-                    if i + half < w {
-                        sum += grid[[i + half, j]];
-                        count += 1;
-                    }
-                    if j >= half {
-                        sum += grid[[i, j - half]];
-                        count += 1;
-                    }
-                    if j + half < h {
-                        sum += grid[[i, j + half]];
-                        count += 1;
-                    }
-                    let avg = sum / count as f32;
-                    let value = avg + self.get_rough_rate(&mut rng);
-                    grid[[i, j]] = value;
+                    let l = grid[[i - half, j]];
+                    let r = grid[[i + half, j]];
+                    let u = grid[[i, (h + j - half) % h]];
+                    let d = grid[[i, (0 + j + half) % h]];
+                    grid[[i, j]] = self.random_average(&mut rng, [l, r, u, d]);
                 }
             }
             // square step old rows
             for i in (0..w).step_by(step) {
                 for j in (half..h).step_by(step) {
-                    let mut sum = 0.0;
-                    let mut count = 0;
-                    if i >= half {
-                        sum += grid[[i - half, j]];
-                        count += 1;
-                    }
-                    if i + half < w {
-                        sum += grid[[i + half, j]];
-                        count += 1;
-                    }
-                    if j >= half {
-                        sum += grid[[i, j - half]];
-                        count += 1;
-                    }
-                    if j + half < h {
-                        sum += grid[[i, j + half]];
-                        count += 1;
-                    }
-                    let avg = sum / count as f32;
-                    let value = avg + self.get_rough_rate(&mut rng);
-                    grid[[i, j]] = value;
+                    let l = grid[[(w + i - half) % w, j]];
+                    let r = grid[[(0 + i + half) % w, j]];
+                    let u = grid[[i, j - half]];
+                    let d = grid[[i, j + half]];
+                    grid[[i, j]] = self.random_average(&mut rng, [l, r, u, d]);
                 }
             }
             step /= 2;
@@ -114,17 +81,9 @@ impl DiamondSquare {
         GridTerrain { grid, range }
     }
 
-    pub fn get_rough_rate(&self, rng: &mut SmallRng) -> f32 {
+    pub fn random_average(&self, rng: &mut SmallRng, vs: [f32; 4]) -> f32 {
+        let avg = vs.iter().sum::<f32>() / 4.0;
         let r_roughness = self.roughness.recip();
-        rng.gen_range(r_roughness..self.roughness)
-    }
-    pub fn is_corner(&self, i: usize, j: usize) -> bool {
-        let mut step = 2usize.pow(self.iteration);
-        let grid_w = step * self.width;
-        let grid_h = step * self.height;
-        (i == 0 && j == 0)
-            || (i == 0 && j == grid_w - 1)
-            || (i == grid_h - 1 && j == 0)
-            || (i == grid_h - 1 && j == grid_w - 1)
+        avg * rng.gen_range(r_roughness..self.roughness)
     }
 }
