@@ -1,6 +1,6 @@
 use std::ops::Range;
 use ndarray::Array2;
-use rand::{Rng, SeedableRng};
+
 
 #[derive(Debug)]
 pub struct GridTerrain {
