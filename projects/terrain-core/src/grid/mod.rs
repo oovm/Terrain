@@ -10,4 +10,5 @@ pub mod diamond_square;
 #[derive(Debug)]
 pub struct GridTerrain {
     grid: Array2<f32>,
+    range: Range<f32>,
 }

@@ -31,9 +31,12 @@ impl DiamondSquare {
         let grid_w = step * self.width;
         let grid_h = step * self.height;
         let mut grid = Array2::zeros((grid_w, grid_h));
+        let mut range = self.range.clone();
         for y in (0..grid_h).step_by(step) {
             for x in (0..grid_w).step_by(step) {
                 let value = rng.gen_range(self.range.start..self.range.end);
+                range.start = range.start.min(value);
+                range.end = range.end.max(value);
                 grid[[x, y]] = value;
             }
         }
@@ -88,6 +91,6 @@ impl DiamondSquare {
                 }
             }
         }
-        GridTerrain { grid }
+        GridTerrain { grid, range }
     }
 }
