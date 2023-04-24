@@ -30,12 +30,12 @@ impl DiamondSquare {
     pub fn generate(&self) -> GridTerrain {
         let mut rng = SmallRng::seed_from_u64(self.seed);
         let mut step = 2usize.pow(self.iteration);
-        let grid_w = step * self.width;
-        let grid_h = step * self.height;
-        let mut grid = Array2::zeros((grid_w, grid_h));
+        let w = step * self.width;
+        let h = step * self.height;
+        let mut grid = Array2::zeros((w, h));
         let mut range = self.range.clone();
-        for x in (0..grid_h).step_by(step) {
-            for y in (0..grid_w).step_by(step) {
+        for x in (0..h).step_by(step) {
+            for y in (0..w).step_by(step) {
                 let value = rng.gen_range(self.range.start..self.range.end);
                 range.start = range.start.min(value);
                 range.end = range.end.max(value);
@@ -45,8 +45,8 @@ impl DiamondSquare {
         for iteration in 0..self.iteration {
             println!("Iteration: {}, step: {}", iteration + 1, step);
             // Diamond step
-            for i in (0..grid_h).step_by(step).map(|i| i.saturating_sub(1)) {
-                for j in (0..grid_w).step_by(step).map(|j| j.saturating_sub(1)) {
+            for i in (0..h).step_by(step).map(|i| i.saturating_sub(1)) {
+                for j in (0..w).step_by(step).map(|j| j.saturating_sub(1)) {
                     let lu = grid[[i, j]];
                     let ru = grid[[i, j + step]];
                     let ld = grid[[i + step, j]];
@@ -56,16 +56,57 @@ impl DiamondSquare {
                     grid[[i + step / 2, j + step / 2]] = value;
                 }
             }
-            // Square step rows
-            for i in (0..grid_h).step_by(step).map(|i| i.saturating_sub(1)) {
-                for j in (0..grid_w).step_by(step).map(|j| j.saturating_sub(1)) {
-                    let l = grid[[i, j]];
-                    let r = grid[[i, j + step % grid_w]];
-                    let u = grid[[i + step % grid_h, j]];
-                    let d = grid[[i + step % grid_h, j + step % grid_w]];
-                    let avg = (l + r + u + d) / 4.0;
+            // square step even rows
+            let half = step / 2;
+            for i in (half..w).step_by(step) {
+                for j in (0..h).step_by(step) {
+                    let mut sum = 0.0;
+                    let mut count = 0;
+                    if i >= half {
+                        sum += grid[[i - half, j]];
+                        count += 1;
+                    }
+                    if i + half < w {
+                        sum += grid[[i + half, j]];
+                        count += 1;
+                    }
+                    if j >= half {
+                        sum += grid[[i, j - half]];
+                        count += 1;
+                    }
+                    if j + half < h {
+                        sum += grid[[i, j + half]];
+                        count += 1;
+                    }
+                    let avg = sum / count as f32;
                     let value = avg + self.get_rough_rate(&mut rng);
-                    grid[[i + step / 2, j]] = value;
+                    grid[[i, j]] = value;
+                }
+            }
+            // square step old rows
+            for i in (0..w).step_by(step) {
+                for j in (half..h).step_by(step) {
+                    let mut sum = 0.0;
+                    let mut count = 0;
+                    if i >= half {
+                        sum += grid[[i - half, j]];
+                        count += 1;
+                    }
+                    if i + half < w {
+                        sum += grid[[i + half, j]];
+                        count += 1;
+                    }
+                    if j >= half {
+                        sum += grid[[i, j - half]];
+                        count += 1;
+                    }
+                    if j + half < h {
+                        sum += grid[[i, j + half]];
+                        count += 1;
+                    }
+                    let avg = sum / count as f32;
+                    let value = avg + self.get_rough_rate(&mut rng);
+                    grid[[i, j]] = value;
                 }
             }
             step /= 2;
