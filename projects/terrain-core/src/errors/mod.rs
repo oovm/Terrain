@@ -11,6 +11,7 @@ pub struct TerrainError {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum TerrainErrorKind {
+    /// Unknown error
     UnknownError
 }
 

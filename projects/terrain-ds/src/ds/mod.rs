@@ -27,13 +27,13 @@ pub struct DiamondSquare {
     /// Height of the grid
     height: NonZeroUsize,
     /// Iteration of the algorithm
-    pub iteration: u32,
+    iteration: u32,
     /// Range of the random number
-    pub range: Range<f32>,
+    range: Range<f32>,
     /// Roughness of the grid
-    pub roughness: f32,
+    roughness: f32,
     /// Seed of the random number generator
-    pub seed: u64,
+    seed: u64,
 }
 
 impl Default for DiamondSquare {
@@ -56,36 +56,42 @@ impl Default for DiamondSquare {
 
 
 impl DiamondSquare {
-    /// Generate a grid using diamond square algorithm
-    ///
-    /// # Arguments
-    ///
-    /// * `rng`:
-    /// * `vs`:
-    ///
-    /// returns: f32
+    /// Get the initial size of the terrain.
     ///
     /// # Examples
     ///
     /// ```
-    /// use ndarray::Array2;
+    /// # use diamond_square::DiamondSquare;
+    /// let mut ds = DiamondSquare::default();
+    /// assert_eq!(ds.get_size(), (4, 4));
     /// ```
     pub fn get_size(&self) -> (usize, usize) {
         (self.width.get(), self.height.get())
     }
-    /// Generate a grid using diamond square algorithm
-    ///
-    /// # Arguments
-    ///
-    /// * `rng`:
-    /// * `vs`:
-    ///
-    /// returns: f32
+    /// Get the final size of the terrain.
     ///
     /// # Examples
     ///
     /// ```
-    /// use ndarray::Array2;
+    /// # use diamond_square::DiamondSquare;
+    /// let mut ds = DiamondSquare::default();
+    /// assert_eq!(ds.get_map_size(), (17, 17));
+    /// ```
+    pub fn get_map_size(&self) -> (usize, usize) {
+        let step = 2usize.pow(self.iteration);
+        let w = step * self.width.get() + 1;
+        let h = step * self.height.get() + 1;
+        (w, h)
+    }
+    /// Generate a grid using diamond square algorithm
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use diamond_square::DiamondSquare;
+    /// let mut ds = DiamondSquare::default();
+    /// ds.set_size(17, 17);
+    /// assert_eq!(ds.get_size(), (17, 17));
     /// ```
     pub fn set_size(&mut self, width: usize, height: usize) {
         assert!(width > 0, "width must be greater than 0");
@@ -107,10 +113,228 @@ impl DiamondSquare {
     /// # Examples
     ///
     /// ```
-    /// use ndarray::Array2;
+    /// # use diamond_square::DiamondSquare;
+    /// let mut ds = DiamondSquare::default().with_size(17, 17);
+    /// assert_eq!(ds.get_size(), (17, 17));
     /// ```
     pub fn with_size(mut self, width: usize, height: usize) -> Self {
         self.set_size(width, height);
+        self
+    }
+    /// Generate a grid using diamond square algorithm
+    ///
+    /// # Arguments
+    ///
+    /// * `rng`:
+    /// * `vs`:
+    ///
+    /// returns: f32
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use diamond_square::DiamondSquare;
+    /// let mut ds = DiamondSquare::default();
+    /// assert_eq!(ds.get_iteration(), 2);
+    /// ```
+    pub fn get_iteration(&self) -> u32 {
+        self.iteration
+    }
+    /// Generate a grid using diamond square algorithm
+    ///
+    /// # Arguments
+    ///
+    /// * `rng`:
+    /// * `vs`:
+    ///
+    /// returns: f32
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use diamond_square::DiamondSquare;
+    /// let mut ds = DiamondSquare::default();
+    /// ds.set_iteration(5);
+    /// assert_eq!(ds.get_iteration(), 5);
+    /// ```
+    pub fn set_iteration(&mut self, iteration: u32) {
+        assert!(iteration < 30, "iteration too high, out of memory");
+        self.iteration = iteration;
+    }
+    /// Generate a grid using diamond square algorithm
+    ///
+    /// # Arguments
+    ///
+    /// * `rng`:
+    /// * `vs`:
+    ///
+    /// returns: f32
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use diamond_square::DiamondSquare;
+    /// let mut ds = DiamondSquare::default().with_iteration(5);
+    /// assert_eq!(ds.get_iteration(), 5);
+    /// ```
+    pub fn with_iteration(mut self, iteration: u32) -> Self {
+        self.set_iteration(iteration);
+        self
+    }
+    /// Generate a grid using diamond square algorithm
+    ///
+    /// # Arguments
+    ///
+    /// * `rng`:
+    /// * `vs`:
+    ///
+    /// returns: f32
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use ndarray::Array2;
+    /// ```
+    pub fn get_range(&self) -> Range<f32> {
+        self.range.clone()
+    }
+    /// Generate a grid using diamond square algorithm
+    ///
+    /// # Arguments
+    ///
+    /// * `rng`:
+    /// * `vs`:
+    ///
+    /// returns: f32
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use ndarray::Array2;
+    /// ```
+    pub fn set_range(&mut self, range: Range<f32>) {
+        self.range = range;
+    }
+    /// Generate a grid using diamond square algorithm
+    ///
+    /// # Arguments
+    ///
+    /// * `rng`:
+    /// * `vs`:
+    ///
+    /// returns: f32
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use ndarray::Array2;
+    /// ```
+    pub fn with_range(mut self, range: Range<f32>) -> Self {
+        self.set_range(range);
+        self
+    }
+    /// Generate a grid using diamond square algorithm
+    ///
+    /// # Arguments
+    ///
+    /// * `rng`:
+    /// * `vs`:
+    ///
+    /// returns: f32
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use ndarray::Array2;
+    /// ```
+    pub fn get_roughness(&self) -> f32 {
+        self.roughness
+    }
+    /// Generate a grid using diamond square algorithm
+    ///
+    /// # Arguments
+    ///
+    /// * `rng`:
+    /// * `vs`:
+    ///
+    /// returns: f32
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use ndarray::Array2;
+    /// ```
+    pub fn set_roughness(&mut self, roughness: f32) {
+        self.roughness = roughness;
+    }
+    /// Generate a grid using diamond square algorithm
+    ///
+    /// # Arguments
+    ///
+    /// * `rng`:
+    /// * `vs`:
+    ///
+    /// returns: f32
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use ndarray::Array2;
+    /// ```
+    pub fn with_roughness(mut self, roughness: f32) -> Self {
+        self.set_roughness(roughness);
+        self
+    }
+    /// Generate a grid using diamond square algorithm
+    ///
+    /// # Arguments
+    ///
+    /// * `rng`:
+    /// * `vs`:
+    ///
+    /// returns: f32
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use ndarray::Array2;
+    /// ```
+    pub fn get_seed(&self) -> u64 {
+        self.seed
+    }
+    /// Generate a grid using diamond square algorithm
+    ///
+    /// # Arguments
+    ///
+    /// * `rng`:
+    /// * `vs`:
+    ///
+    /// returns: f32
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use ndarray::Array2;
+    /// ```
+    pub fn set_seed(&mut self, seed: u64) {
+        self.seed = seed;
+    }
+    /// Generate a grid using diamond square algorithm
+    ///
+    /// # Arguments
+    ///
+    /// * `rng`:
+    /// * `vs`:
+    ///
+    /// returns: f32
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use ndarray::Array2;
+    /// ```
+    pub fn with_seed(mut self, seed: u64) -> Self {
+        self.set_seed(seed);
         self
     }
 }
@@ -133,8 +357,7 @@ impl DiamondSquare {
     pub fn generate(&self) -> Array2<f32> {
         let mut rng = SmallRng::seed_from_u64(self.seed);
         let mut step = 2usize.pow(self.iteration);
-        let w = step * self.width.get() + 1;
-        let h = step * self.height.get() + 1;
+        let (w, h) = self.get_map_size();
         let mut grid = Array2::zeros((w, h));
         for x in (0..h).step_by(step) {
             for y in (0..w).step_by(step) {
