@@ -2,6 +2,7 @@
 members = ["projects/*"]
 default-members = [
     "projects/terrain-core",
+    "projects/terrain-ds",
 ]
 exclude = [
     "projects/.DS_Store",

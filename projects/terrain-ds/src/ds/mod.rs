@@ -1,9 +1,6 @@
-use std::num::NonZeroUsize;
-use std::ops::Range;
 use ndarray::Array2;
-use rand::rngs::SmallRng;
-use rand::{Rng, SeedableRng};
-
+use rand::{rngs::SmallRng, Rng, SeedableRng};
+use std::{num::NonZeroUsize, ops::Range};
 
 /// Generate a grid using diamond square algorithm
 ///
@@ -43,17 +40,13 @@ impl Default for DiamondSquare {
                 width: NonZeroUsize::new_unchecked(4),
                 height: NonZeroUsize::new_unchecked(4),
                 iteration: 2,
-                seed: 0,
+                seed: 42,
                 roughness: 1.1,
-                range: Range {
-                    start: -1.0,
-                    end: 1.0,
-                },
+                range: Range { start: -1.0, end: 1.0 },
             }
         }
     }
 }
-
 
 impl DiamondSquare {
     /// Get the initial size of the terrain.
@@ -62,8 +55,8 @@ impl DiamondSquare {
     ///
     /// ```
     /// # use diamond_square::DiamondSquare;
-    /// let mut ds = DiamondSquare::default();
-    /// assert_eq!(ds.get_size(), (4, 4));
+    /// let mut cfg = DiamondSquare::default();
+    /// assert_eq!(cfg.get_size(), (4, 4));
     /// ```
     pub fn get_size(&self) -> (usize, usize) {
         (self.width.get(), self.height.get())
@@ -74,8 +67,8 @@ impl DiamondSquare {
     ///
     /// ```
     /// # use diamond_square::DiamondSquare;
-    /// let mut ds = DiamondSquare::default();
-    /// assert_eq!(ds.get_map_size(), (17, 17));
+    /// let mut cfg = DiamondSquare::default();
+    /// assert_eq!(cfg.get_map_size(), (17, 17));
     /// ```
     pub fn get_map_size(&self) -> (usize, usize) {
         let step = 2usize.pow(self.iteration);
@@ -89,9 +82,9 @@ impl DiamondSquare {
     ///
     /// ```
     /// # use diamond_square::DiamondSquare;
-    /// let mut ds = DiamondSquare::default();
-    /// ds.set_size(17, 17);
-    /// assert_eq!(ds.get_size(), (17, 17));
+    /// let mut cfg = DiamondSquare::default();
+    /// cfg.set_size(17, 17);
+    /// assert_eq!(cfg.get_size(), (17, 17));
     /// ```
     pub fn set_size(&mut self, width: usize, height: usize) {
         assert!(width > 0, "width must be greater than 0");
@@ -114,8 +107,8 @@ impl DiamondSquare {
     ///
     /// ```
     /// # use diamond_square::DiamondSquare;
-    /// let mut ds = DiamondSquare::default().with_size(17, 17);
-    /// assert_eq!(ds.get_size(), (17, 17));
+    /// let mut cfg = DiamondSquare::default().with_size(17, 17);
+    /// assert_eq!(cfg.get_size(), (17, 17));
     /// ```
     pub fn with_size(mut self, width: usize, height: usize) -> Self {
         self.set_size(width, height);
@@ -134,8 +127,8 @@ impl DiamondSquare {
     ///
     /// ```
     /// # use diamond_square::DiamondSquare;
-    /// let mut ds = DiamondSquare::default();
-    /// assert_eq!(ds.get_iteration(), 2);
+    /// let mut cfg = DiamondSquare::default();
+    /// assert_eq!(cfg.get_iteration(), 2);
     /// ```
     pub fn get_iteration(&self) -> u32 {
         self.iteration
@@ -153,9 +146,9 @@ impl DiamondSquare {
     ///
     /// ```
     /// # use diamond_square::DiamondSquare;
-    /// let mut ds = DiamondSquare::default();
-    /// ds.set_iteration(5);
-    /// assert_eq!(ds.get_iteration(), 5);
+    /// let mut cfg = DiamondSquare::default();
+    /// cfg.set_iteration(5);
+    /// assert_eq!(cfg.get_iteration(), 5);
     /// ```
     pub fn set_iteration(&mut self, iteration: u32) {
         assert!(iteration < 30, "iteration too high, out of memory");
@@ -174,8 +167,8 @@ impl DiamondSquare {
     ///
     /// ```
     /// # use diamond_square::DiamondSquare;
-    /// let mut ds = DiamondSquare::default().with_iteration(5);
-    /// assert_eq!(ds.get_iteration(), 5);
+    /// let mut cfg = DiamondSquare::default().with_iteration(5);
+    /// assert_eq!(cfg.get_iteration(), 5);
     /// ```
     pub fn with_iteration(mut self, iteration: u32) -> Self {
         self.set_iteration(iteration);
@@ -194,9 +187,9 @@ impl DiamondSquare {
     ///
     /// ```
     /// # use diamond_square::DiamondSquare;
-    /// let mut ds = DiamondSquare::default();
-    /// assert_eq!(ds.get_range().start, -1.0);
-    /// assert_eq!(ds.get_range().end, 1.0);
+    /// let mut cfg = DiamondSquare::default();
+    /// assert_eq!(cfg.get_range().start, -1.0);
+    /// assert_eq!(cfg.get_range().end, 1.0);
     /// ```
     pub fn get_range(&self) -> Range<f32> {
         self.range.clone()
@@ -214,9 +207,9 @@ impl DiamondSquare {
     ///
     /// ```
     /// # use diamond_square::DiamondSquare;
-    /// let mut ds = DiamondSquare::default();
-    /// ds.set_range(-2.0..2.0);
-    /// assert_eq!(ds.get_range().start, -2.0);
+    /// let mut cfg = DiamondSquare::default();
+    /// cfg.set_range(-2.0..2.0);
+    /// assert_eq!(cfg.get_range().start, -2.0);
     /// ```
     pub fn set_range(&mut self, range: Range<f32>) {
         self.range = range;
@@ -234,9 +227,9 @@ impl DiamondSquare {
     ///
     /// ```
     /// # use diamond_square::DiamondSquare;
-    /// let mut ds = DiamondSquare::default().with_range(-2.0..2.0);
-    /// assert_eq!(ds.get_range().start, -2.0);
-    /// assert_eq!(ds.get_range().end, 2.0);
+    /// let mut cfg = DiamondSquare::default().with_range(-2.0..2.0);
+    /// assert_eq!(cfg.get_range().start, -2.0);
+    /// assert_eq!(cfg.get_range().end, 2.0);
     /// ```
     pub fn with_range(mut self, range: Range<f32>) -> Self {
         self.set_range(range);
@@ -255,8 +248,8 @@ impl DiamondSquare {
     ///
     /// ```
     /// # use diamond_square::DiamondSquare;
-    /// let mut ds = DiamondSquare::default();
-    /// assert_eq!(ds.get_roughness(), 1.1);
+    /// let mut cfg = DiamondSquare::default();
+    /// assert_eq!(cfg.get_roughness(), 1.1);
     /// ```
     pub fn get_roughness(&self) -> f32 {
         self.roughness
@@ -274,9 +267,9 @@ impl DiamondSquare {
     ///
     /// ```
     /// # use diamond_square::DiamondSquare;
-    /// let mut ds = DiamondSquare::default();
-    /// ds.set_roughness(1.5);
-    /// assert_eq!(ds.get_roughness(), 1.5);
+    /// let mut cfg = DiamondSquare::default();
+    /// cfg.set_roughness(1.5);
+    /// assert_eq!(cfg.get_roughness(), 1.5);
     /// ```
     pub fn set_roughness(&mut self, roughness: f32) {
         assert!(roughness >= 1.0, "roughness must be greater than 1.0");
@@ -295,8 +288,8 @@ impl DiamondSquare {
     ///
     /// ```
     /// # use diamond_square::DiamondSquare;
-    /// let mut ds = DiamondSquare::default().with_roughness(1.5);
-    /// assert_eq!(ds.get_roughness(), 1.5);
+    /// let mut cfg = DiamondSquare::default().with_roughness(1.5);
+    /// assert_eq!(cfg.get_roughness(), 1.5);
     /// ```
     pub fn with_roughness(mut self, roughness: f32) -> Self {
         self.set_roughness(roughness);
@@ -315,8 +308,8 @@ impl DiamondSquare {
     ///
     /// ```
     /// # use diamond_square::DiamondSquare;
-    /// let mut ds = DiamondSquare::default();
-    /// assert_eq!(ds.get_seed(), 0);
+    /// let mut cfg = DiamondSquare::default();
+    /// assert_eq!(cfg.get_seed(), 42);
     /// ```
     pub fn get_seed(&self) -> u64 {
         self.seed
@@ -334,9 +327,9 @@ impl DiamondSquare {
     ///
     /// ```
     /// # use diamond_square::DiamondSquare;
-    /// let mut ds = DiamondSquare::default();
-    /// ds.set_seed(123);
-    /// assert_eq!(ds.get_seed(), 123);
+    /// let mut cfg = DiamondSquare::default();
+    /// cfg.set_seed(0);
+    /// assert_eq!(cfg.get_seed(), 0);
     /// ```
     pub fn set_seed(&mut self, seed: u64) {
         self.seed = seed;
@@ -354,8 +347,8 @@ impl DiamondSquare {
     ///
     /// ```
     /// # use diamond_square::DiamondSquare;
-    /// let mut ds = DiamondSquare::default().with_seed(123);
-    /// assert_eq!(ds.get_seed(), 123);
+    /// let mut cfg = DiamondSquare::default().with_seed(0);
+    /// assert_eq!(cfg.get_seed(), 0);
     /// ```
     pub fn with_seed(mut self, seed: u64) -> Self {
         self.set_seed(seed);
@@ -385,7 +378,7 @@ impl DiamondSquare {
         let mut grid = Array2::zeros((w, h));
         for x in (0..h).step_by(step) {
             for y in (0..w).step_by(step) {
-                let value = rng.gen_range(self.range.start..self.range.end);
+                let value = rng.gen_range(self.range.clone());
                 grid[[x, y]] = value;
             }
         }

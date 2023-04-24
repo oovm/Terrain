@@ -3,14 +3,14 @@ use terrain_core::{DiamondSquare, GridTerrain};
 
 #[test]
 fn test17x17() {
-    let ds = DiamondSquare::default().with_iteration(2);
+    let ds = DiamondSquare::default().with_iteration(2).with_seed(rand::random());
     let grid = GridTerrain::diamond_square(&ds);
     println!("{:?}", grid);
 }
 
 #[test]
 fn test17x1() {
-    let config = MidpointDisplacement::default().with_iteration(2);
+    let config = MidpointDisplacement::default().with_length(10).with_iteration(2).with_seed(rand::random());
     let grid = GridTerrain::mid_point_displacement(&config);
     println!("{:?}", grid);
 }

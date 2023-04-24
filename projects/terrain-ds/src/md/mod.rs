@@ -31,7 +31,7 @@ impl Default for MidpointDisplacement {
                 length: NonZeroUsize::new_unchecked(4),
                 iteration: 2,
                 roughness: 1.1,
-                seed: 0,
+                seed: 42,
                 range: Range { start: -1.0, end: 1.0 },
             }
         }
@@ -45,8 +45,8 @@ impl MidpointDisplacement {
     ///
     /// ```
     /// # use diamond_square::MidpointDisplacement;
-    /// let mut ds = MidpointDisplacement::default();
-    /// assert_eq!(ds.get_length(), 4);
+    /// let mut cfg = MidpointDisplacement::default();
+    /// assert_eq!(cfg.get_length(), 4);
     /// ```
     pub fn get_length(&self) -> usize {
         self.length.get()
@@ -57,8 +57,8 @@ impl MidpointDisplacement {
     ///
     /// ```
     /// # use diamond_square::MidpointDisplacement;
-    /// let mut ds = MidpointDisplacement::default();
-    /// assert_eq!(ds.get_map_length(), 17);
+    /// let mut cfg = MidpointDisplacement::default();
+    /// assert_eq!(cfg.get_map_length(), 17);
     /// ```
     pub fn get_map_length(&self) -> usize {
         let step = 2usize.pow(self.iteration);
@@ -70,9 +70,9 @@ impl MidpointDisplacement {
     ///
     /// ```
     /// # use diamond_square::MidpointDisplacement;
-    /// let mut ds = MidpointDisplacement::default();
-    /// ds.set_length(8);
-    /// assert_eq!(ds.get_length(), 8);
+    /// let mut cfg = MidpointDisplacement::default();
+    /// cfg.set_length(8);
+    /// assert_eq!(cfg.get_length(), 8);
     /// ```
     pub fn set_length(&mut self, length: usize) {
         self.length = NonZeroUsize::new(length).unwrap();
@@ -83,8 +83,8 @@ impl MidpointDisplacement {
     ///
     /// ```
     /// # use diamond_square::MidpointDisplacement;
-    /// let mut ds = MidpointDisplacement::default();
-    /// assert_eq!(ds.get_size(), (4, 4));
+    /// let mut cfg = MidpointDisplacement::default().with_length(10);
+    /// assert_eq!(cfg.get_length(), 10);
     /// ```
     pub fn with_length(mut self, length: usize) -> Self {
         self.set_length(length);
@@ -96,8 +96,8 @@ impl MidpointDisplacement {
     ///
     /// ```
     /// # use diamond_square::MidpointDisplacement;
-    /// let mut ds = MidpointDisplacement::default();
-    /// assert_eq!(ds.get_size(), (4, 4));
+    /// let mut cfg = MidpointDisplacement::default();
+    /// assert_eq!(cfg.get_iteration(), 2);
     /// ```
     pub fn get_iteration(&self) -> u32 {
         self.iteration
@@ -108,8 +108,9 @@ impl MidpointDisplacement {
     ///
     /// ```
     /// # use diamond_square::MidpointDisplacement;
-    /// let mut ds = MidpointDisplacement::default();
-    /// assert_eq!(ds.get_size(), (4, 4));
+    /// let mut cfg = MidpointDisplacement::default();
+    /// cfg.set_iteration(10);
+    /// assert_eq!(cfg.get_iteration(), 10);
     /// ```
     pub fn set_iteration(&mut self, iteration: u32) {
         self.iteration = iteration;
@@ -120,8 +121,8 @@ impl MidpointDisplacement {
     ///
     /// ```
     /// # use diamond_square::MidpointDisplacement;
-    /// let mut ds = MidpointDisplacement::default();
-    /// assert_eq!(ds.get_size(), (4, 4));
+    /// let mut cfg = MidpointDisplacement::default().with_iteration(10);
+    /// assert_eq!(cfg.get_iteration(), 10);
     /// ```
     pub fn with_iteration(mut self, iteration: u32) -> Self {
         self.set_iteration(iteration);
@@ -133,8 +134,23 @@ impl MidpointDisplacement {
     ///
     /// ```
     /// # use diamond_square::MidpointDisplacement;
-    /// let mut ds = MidpointDisplacement::default();
-    /// assert_eq!(ds.get_size(), (4, 4));
+    /// let mut cfg = MidpointDisplacement::default();
+    /// assert_eq!(cfg.get_range().start, -1.0);
+    /// assert_eq!(cfg.get_range().end, 1.0);
+    /// ```
+    pub fn get_range(&self) -> Range<f32> {
+        self.range.clone()
+    }
+    /// Get the initial size of the terrain.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use diamond_square::MidpointDisplacement;
+    /// let mut cfg = MidpointDisplacement::default();
+    /// cfg.set_range(0.0..1.0);
+    /// assert_eq!(cfg.get_range().start, 0.0);
+    /// assert_eq!(cfg.get_range().end, 1.0);
     /// ```
     pub fn set_range(&mut self, range: Range<f32>) {
         self.range = range;
@@ -145,8 +161,9 @@ impl MidpointDisplacement {
     ///
     /// ```
     /// # use diamond_square::MidpointDisplacement;
-    /// let mut ds = MidpointDisplacement::default();
-    /// assert_eq!(ds.get_size(), (4, 4));
+    /// let mut cfg = MidpointDisplacement::default().with_range(0.0..1.0);
+    /// assert_eq!(cfg.get_range().start, 0.0);
+    /// assert_eq!(cfg.get_range().end, 1.0);
     /// ```
     pub fn with_range(mut self, range: Range<f32>) -> Self {
         self.set_range(range);
@@ -158,8 +175,21 @@ impl MidpointDisplacement {
     ///
     /// ```
     /// # use diamond_square::MidpointDisplacement;
-    /// let mut ds = MidpointDisplacement::default();
-    /// assert_eq!(ds.get_size(), (4, 4));
+    /// let mut cfg = MidpointDisplacement::default();
+    /// assert_eq!(cfg.get_roughness(), 1.1);
+    /// ```
+    pub fn get_roughness(&self) -> f32 {
+        self.roughness
+    }
+    /// Get the initial size of the terrain.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use diamond_square::MidpointDisplacement;
+    /// let mut cfg = MidpointDisplacement::default();
+    /// cfg.set_roughness(2.0);
+    /// assert_eq!(cfg.get_roughness(), 2.0);
     /// ```
     pub fn set_roughness(&mut self, roughness: f32) {
         self.roughness = roughness;
@@ -170,8 +200,8 @@ impl MidpointDisplacement {
     ///
     /// ```
     /// # use diamond_square::MidpointDisplacement;
-    /// let mut ds = MidpointDisplacement::default();
-    /// assert_eq!(ds.get_size(), (4, 4));
+    /// let mut cfg = MidpointDisplacement::default().with_roughness(2.0);
+    /// assert_eq!(cfg.get_roughness(), 2.0);
     /// ```
     pub fn with_roughness(mut self, roughness: f32) -> Self {
         self.set_roughness(roughness);
@@ -183,8 +213,21 @@ impl MidpointDisplacement {
     ///
     /// ```
     /// # use diamond_square::MidpointDisplacement;
-    /// let mut ds = MidpointDisplacement::default();
-    /// assert_eq!(ds.get_size(), (4, 4));
+    /// let mut cfg = MidpointDisplacement::default();
+    /// assert_eq!(cfg.get_seed(), 42);
+    /// ```
+    pub fn get_seed(&self) -> u64 {
+        self.seed
+    }
+    /// Get the initial size of the terrain.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use diamond_square::MidpointDisplacement;
+    /// let mut cfg = MidpointDisplacement::default();
+    /// cfg.set_seed(0);
+    /// assert_eq!(cfg.get_seed(), 0);
     /// ```
     pub fn set_seed(&mut self, seed: u64) {
         self.seed = seed;
@@ -195,8 +238,8 @@ impl MidpointDisplacement {
     ///
     /// ```
     /// # use diamond_square::MidpointDisplacement;
-    /// let mut ds = MidpointDisplacement::default();
-    /// assert_eq!(ds.get_size(), (4, 4));
+    /// let mut cfg = MidpointDisplacement::default().with_seed(0);
+    /// assert_eq!(cfg.get_seed(), 0);
     /// ```
     pub fn with_seed(mut self, seed: u64) -> Self {
         self.set_seed(seed);
@@ -222,7 +265,6 @@ impl MidpointDisplacement {
         }
         for iteration in 0..self.iteration {
             tracing::trace!("Iteration: {}, step: {} in {}", iteration + 1, step, length);
-            // diamond step
             let half = step / 2;
             for i in (half..length).step_by(step) {
                 let l = grid[[i - half]];

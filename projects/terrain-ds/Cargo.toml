@@ -1,6 +1,6 @@
 [package]
 name = "diamond-square"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Aster <192607617@qq.com>"]
 description = "Generate heightmap using diamond-square algorithm"
 repository = "https://github.com/oovm/Terrain/tree/dev/projects/terrain-ds"
@@ -20,3 +20,7 @@ serde = { version = "1.0.130", features = ["derive"], optional = true }
 [features]
 default = []
 serde = ["dep:serde"]
+
+
+[package.metadata.docs.rs]
+all-features = true
