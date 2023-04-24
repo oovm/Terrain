@@ -1,3 +1,4 @@
+use std::num::NonZeroUsize;
 use std::ops::Range;
 use ndarray::Array2;
 use rand::rngs::SmallRng;
@@ -22,9 +23,9 @@ use rand::{Rng, SeedableRng};
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DiamondSquare {
     /// Width of the grid
-    pub width: usize,
+    width: NonZeroUsize,
     /// Height of the grid
-    pub height: usize,
+    height: NonZeroUsize,
     /// Iteration of the algorithm
     pub iteration: u32,
     /// Range of the random number
@@ -37,17 +38,80 @@ pub struct DiamondSquare {
 
 impl Default for DiamondSquare {
     fn default() -> Self {
-        Self {
-            width: 4,
-            height: 4,
-            iteration: 2,
-            seed: 0,
-            roughness: 1.1,
-            range: Range {
-                start: -1.0,
-                end: 1.0,
-            },
+        unsafe {
+            Self {
+                width: NonZeroUsize::new_unchecked(4),
+                height: NonZeroUsize::new_unchecked(4),
+                iteration: 2,
+                seed: 0,
+                roughness: 1.1,
+                range: Range {
+                    start: -1.0,
+                    end: 1.0,
+                },
+            }
         }
+    }
+}
+
+
+impl DiamondSquare {
+    /// Generate a grid using diamond square algorithm
+    ///
+    /// # Arguments
+    ///
+    /// * `rng`:
+    /// * `vs`:
+    ///
+    /// returns: f32
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use ndarray::Array2;
+    /// ```
+    pub fn get_size(&self) -> (usize, usize) {
+        (self.width.get(), self.height.get())
+    }
+    /// Generate a grid using diamond square algorithm
+    ///
+    /// # Arguments
+    ///
+    /// * `rng`:
+    /// * `vs`:
+    ///
+    /// returns: f32
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use ndarray::Array2;
+    /// ```
+    pub fn set_size(&mut self, width: usize, height: usize) {
+        assert!(width > 0, "width must be greater than 0");
+        assert!(height > 0, "height must be greater than 0");
+        unsafe {
+            self.width = NonZeroUsize::new_unchecked(width);
+            self.height = NonZeroUsize::new_unchecked(height);
+        }
+    }
+    /// Generate a grid using diamond square algorithm
+    ///
+    /// # Arguments
+    ///
+    /// * `rng`:
+    /// * `vs`:
+    ///
+    /// returns: f32
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use ndarray::Array2;
+    /// ```
+    pub fn with_size(mut self, width: usize, height: usize) -> Self {
+        self.set_size(width, height);
+        self
     }
 }
 
@@ -69,8 +133,8 @@ impl DiamondSquare {
     pub fn generate(&self) -> Array2<f32> {
         let mut rng = SmallRng::seed_from_u64(self.seed);
         let mut step = 2usize.pow(self.iteration);
-        let w = step * self.width + 1;
-        let h = step * self.height + 1;
+        let w = step * self.width.get() + 1;
+        let h = step * self.height.get() + 1;
         let mut grid = Array2::zeros((w, h));
         for x in (0..h).step_by(step) {
             for y in (0..w).step_by(step) {
