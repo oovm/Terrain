@@ -193,7 +193,10 @@ impl DiamondSquare {
     /// # Examples
     ///
     /// ```
-    /// use ndarray::Array2;
+    /// # use diamond_square::DiamondSquare;
+    /// let mut ds = DiamondSquare::default();
+    /// assert_eq!(ds.get_range().start, -1.0);
+    /// assert_eq!(ds.get_range().end, 1.0);
     /// ```
     pub fn get_range(&self) -> Range<f32> {
         self.range.clone()
@@ -210,7 +213,10 @@ impl DiamondSquare {
     /// # Examples
     ///
     /// ```
-    /// use ndarray::Array2;
+    /// # use diamond_square::DiamondSquare;
+    /// let mut ds = DiamondSquare::default();
+    /// ds.set_range(-2.0..2.0);
+    /// assert_eq!(ds.get_range().start, -2.0);
     /// ```
     pub fn set_range(&mut self, range: Range<f32>) {
         self.range = range;
@@ -227,7 +233,10 @@ impl DiamondSquare {
     /// # Examples
     ///
     /// ```
-    /// use ndarray::Array2;
+    /// # use diamond_square::DiamondSquare;
+    /// let mut ds = DiamondSquare::default().with_range(-2.0..2.0);
+    /// assert_eq!(ds.get_range().start, -2.0);
+    /// assert_eq!(ds.get_range().end, 2.0);
     /// ```
     pub fn with_range(mut self, range: Range<f32>) -> Self {
         self.set_range(range);
@@ -245,7 +254,9 @@ impl DiamondSquare {
     /// # Examples
     ///
     /// ```
-    /// use ndarray::Array2;
+    /// # use diamond_square::DiamondSquare;
+    /// let mut ds = DiamondSquare::default();
+    /// assert_eq!(ds.get_roughness(), 1.1);
     /// ```
     pub fn get_roughness(&self) -> f32 {
         self.roughness
@@ -262,9 +273,13 @@ impl DiamondSquare {
     /// # Examples
     ///
     /// ```
-    /// use ndarray::Array2;
+    /// # use diamond_square::DiamondSquare;
+    /// let mut ds = DiamondSquare::default();
+    /// ds.set_roughness(1.5);
+    /// assert_eq!(ds.get_roughness(), 1.5);
     /// ```
     pub fn set_roughness(&mut self, roughness: f32) {
+        assert!(roughness >= 1.0, "roughness must be greater than 1.0");
         self.roughness = roughness;
     }
     /// Generate a grid using diamond square algorithm
@@ -279,7 +294,9 @@ impl DiamondSquare {
     /// # Examples
     ///
     /// ```
-    /// use ndarray::Array2;
+    /// # use diamond_square::DiamondSquare;
+    /// let mut ds = DiamondSquare::default().with_roughness(1.5);
+    /// assert_eq!(ds.get_roughness(), 1.5);
     /// ```
     pub fn with_roughness(mut self, roughness: f32) -> Self {
         self.set_roughness(roughness);
@@ -297,7 +314,9 @@ impl DiamondSquare {
     /// # Examples
     ///
     /// ```
-    /// use ndarray::Array2;
+    /// # use diamond_square::DiamondSquare;
+    /// let mut ds = DiamondSquare::default();
+    /// assert_eq!(ds.get_seed(), 0);
     /// ```
     pub fn get_seed(&self) -> u64 {
         self.seed
@@ -314,7 +333,10 @@ impl DiamondSquare {
     /// # Examples
     ///
     /// ```
-    /// use ndarray::Array2;
+    /// # use diamond_square::DiamondSquare;
+    /// let mut ds = DiamondSquare::default();
+    /// ds.set_seed(123);
+    /// assert_eq!(ds.get_seed(), 123);
     /// ```
     pub fn set_seed(&mut self, seed: u64) {
         self.seed = seed;
@@ -331,7 +353,9 @@ impl DiamondSquare {
     /// # Examples
     ///
     /// ```
-    /// use ndarray::Array2;
+    /// # use diamond_square::DiamondSquare;
+    /// let mut ds = DiamondSquare::default().with_seed(123);
+    /// assert_eq!(ds.get_seed(), 123);
     /// ```
     pub fn with_seed(mut self, seed: u64) -> Self {
         self.set_seed(seed);
@@ -402,7 +426,7 @@ impl DiamondSquare {
         }
         grid
     }
-
+    /// Calculate the average of the given values with random multiplier
     fn random_average(&self, rng: &mut SmallRng, vs: [f32; 4]) -> f32 {
         let avg = vs.iter().sum::<f32>() / 4.0;
         let r_roughness = self.roughness.recip();

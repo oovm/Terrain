@@ -4,5 +4,8 @@
 #![doc = include_str!("../readme.md")]
 
 mod ds;
+mod md;
 
-pub use crate::ds::{DiamondSquare};
+pub use crate::ds::DiamondSquare;
+
+pub use crate::md::MidpointDisplacement;
