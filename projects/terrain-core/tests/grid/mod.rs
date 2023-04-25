@@ -21,6 +21,7 @@ fn test() {
     let ds = DiamondSquare::default().with_size(20, 20).with_iteration(1).with_seed(rand::random());
     let mut rng = rand::thread_rng();
     let array = uniform_area2d(4, 2, &mut rng);
-    let a = ds.generate_by_array(array.view());
+    println!("{:?}", array);
+    let a = ds.enlarge(array.view());
     println!("{:?}", a);
 }

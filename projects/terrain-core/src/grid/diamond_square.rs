@@ -1,5 +1,5 @@
 use crate::{DiamondSquare, GridTerrain};
-use diamond_square::MidpointDisplacement;
+use diamond_square::{uniform_area2d, MidpointDisplacement};
 use ndarray::Array2;
 
 impl From<DiamondSquare> for GridTerrain {
@@ -49,7 +49,8 @@ impl GridTerrain {
     /// use diamond_square::DiamondSquare;
     /// ```
     pub fn diamond_square(config: &DiamondSquare) -> Self {
-        let grid = config.generate();
+        // let mut grid = uniform_area2d(config.get_width(), config.get_height(), 0.0);
+        let grid = config.enlarge(todo!());
         let min = grid.iter().fold(f32::MAX, |acc, &x| acc.min(x));
         let max = grid.iter().fold(f32::MIN, |acc, &x| acc.max(x));
         GridTerrain { grid, range: min..max }
