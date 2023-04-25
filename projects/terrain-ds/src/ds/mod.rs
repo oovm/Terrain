@@ -1,5 +1,5 @@
 use ndarray::{Array2, ArrayView2};
-use rand::{rngs::SmallRng, Rng, SeedableRng};
+use rand::Rng;
 
 /// Generate a grid using diamond square algorithm
 ///
@@ -22,17 +22,34 @@ pub struct DiamondSquare {
     iteration: u32,
     /// Roughness of the grid
     roughness: f32,
-    /// Seed of the random number generator
-    seed: u64,
 }
 
 impl Default for DiamondSquare {
     fn default() -> Self {
-        unsafe { Self { iteration: 2, seed: 42, roughness: 1.1 } }
+        Self { iteration: 2, roughness: 1.1 }
     }
 }
 
 impl DiamondSquare {
+    /// Generate a grid using diamond square algorithm
+    ///
+    /// # Arguments
+    ///
+    /// * `rng`:
+    /// * `vs`:
+    ///
+    /// returns: f32
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use diamond_square::DiamondSquare;
+    /// let mut cfg = DiamondSquare::default();
+    /// assert_eq!(cfg.get_iteration(), 2);
+    /// ```
+    pub fn new(iteration: u32, roughness: f32) -> Self {
+        Self { iteration, roughness }
+    }
     /// Generate a grid using diamond square algorithm
     ///
     /// # Arguments
@@ -153,65 +170,6 @@ impl DiamondSquare {
         self.set_roughness(roughness);
         self
     }
-    /// Generate a grid using diamond square algorithm
-    ///
-    /// # Arguments
-    ///
-    /// * `rng`:
-    /// * `vs`:
-    ///
-    /// returns: f32
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use diamond_square::DiamondSquare;
-    /// let mut cfg = DiamondSquare::default();
-    /// assert_eq!(cfg.get_seed(), 42);
-    /// ```
-    pub fn get_seed(&self) -> u64 {
-        self.seed
-    }
-    /// Generate a grid using diamond square algorithm
-    ///
-    /// # Arguments
-    ///
-    /// * `rng`:
-    /// * `vs`:
-    ///
-    /// returns: f32
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use diamond_square::DiamondSquare;
-    /// let mut cfg = DiamondSquare::default();
-    /// cfg.set_seed(0);
-    /// assert_eq!(cfg.get_seed(), 0);
-    /// ```
-    pub fn set_seed(&mut self, seed: u64) {
-        self.seed = seed;
-    }
-    /// Generate a grid using diamond square algorithm
-    ///
-    /// # Arguments
-    ///
-    /// * `rng`:
-    /// * `vs`:
-    ///
-    /// returns: f32
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use diamond_square::DiamondSquare;
-    /// let mut cfg = DiamondSquare::default().with_seed(0);
-    /// assert_eq!(cfg.get_seed(), 0);
-    /// ```
-    pub fn with_seed(mut self, seed: u64) -> Self {
-        self.set_seed(seed);
-        self
-    }
 }
 
 impl DiamondSquare {
@@ -229,8 +187,7 @@ impl DiamondSquare {
     /// ```
     /// use ndarray::Array2;
     /// ```
-    pub fn enlarge(&self, matrix: ArrayView2<f32>) -> Array2<f32> {
-        let mut rng = SmallRng::seed_from_u64(self.seed);
+    pub fn enlarge(&self, matrix: ArrayView2<f32>, rng: &mut impl Rng) -> Array2<f32> {
         let mut step = 2usize.pow(self.iteration);
         unsafe {
             let (mut output, w, h) = self.enlarge_map(matrix);
@@ -244,7 +201,7 @@ impl DiamondSquare {
                         let ru = *output.uget([(i + half) % w, j - half]);
                         let ld = *output.uget([i - half, (j + half) % h]);
                         let rd = *output.uget([(i + half) % w, (j + half) % h]);
-                        *output.uget_mut([i, j]) = self.random_average(&mut rng, [lu, ru, ld, rd]);
+                        *output.uget_mut([i, j]) = self.random_average(rng, [lu, ru, ld, rd]);
                     }
                 }
                 // square step even rows
@@ -254,22 +211,21 @@ impl DiamondSquare {
                         let r = *output.uget([(0 + i + half), j]);
                         let u = *output.uget([i, (h + j - half) % h]);
                         let d = *output.uget([i, (0 + j + half) % h]);
-                        *output.uget_mut([i, j]) = self.random_average(&mut rng, [l, r, u, d]);
+                        *output.uget_mut([i, j]) = self.random_average(rng, [l, r, u, d]);
                     }
                 }
                 // square step old rows
                 for j in (0..h).step_by(step) {
                     for i in (half..w).step_by(step) {
-                        let l = *output.get([i - half, j]).unwrap();
-                        let r = *output.get([(i + half) % w, j]).unwrap();
-                        let u = *output.get([i, (h + j - half) % h]).unwrap();
-                        let d = *output.get([i, (0 + j + half) % h]).unwrap();
-                        *output.uget_mut([i, j]) = self.random_average(&mut rng, [l, r, u, d]);
+                        let l = *output.uget([i - half, j]);
+                        let r = *output.uget([(i + half) % w, j]);
+                        let u = *output.uget([i, (h + j - half) % h]);
+                        let d = *output.uget([i, (0 + j + half) % h]);
+                        *output.uget_mut([i, j]) = self.random_average(rng, [l, r, u, d]);
                     }
                 }
                 step = half;
             }
-            // drop last colomn and last row
             output
         }
     }
@@ -287,9 +243,14 @@ impl DiamondSquare {
     }
 
     /// Calculate the average of the given values with random multiplier
-    fn random_average(&self, rng: &mut SmallRng, vs: [f32; 4]) -> f32 {
+    fn random_average(&self, rng: &mut impl Rng, vs: [f32; 4]) -> f32 {
         let avg = vs.iter().sum::<f32>() / 4.0;
-        let r_roughness = self.roughness.recip();
-        avg * rng.gen_range(r_roughness..self.roughness)
+        if self.roughness == 1.0 {
+            avg
+        }
+        else {
+            let r_roughness = self.roughness.recip();
+            avg * rng.gen_range(r_roughness..self.roughness)
+        }
     }
 }

@@ -1,6 +1,6 @@
 [package]
 name = "diamond-square"
-version = "0.0.2"
+version = "0.0.3"
 authors = ["Aster <192607617@qq.com>"]
 description = "Generate heightmap using diamond-square algorithm"
 repository = "https://github.com/oovm/Terrain/tree/dev/projects/terrain-ds"

@@ -9,5 +9,4 @@ mod grid;
 
 pub use errors::{TerrainError, TerrainErrorKind, TerrainResult};
 
-pub use crate::grid::GridTerrain;
-pub use diamond_square::DiamondSquare;
+pub use crate::grid::{diamond_square::DiamondSquare, GridTerrain};

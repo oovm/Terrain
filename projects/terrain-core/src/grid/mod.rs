@@ -3,7 +3,7 @@ use image::GrayImage;
 use ndarray::Array2;
 use std::ops::{Index, Range};
 
-mod diamond_square;
+pub mod diamond_square;
 mod export_image;
 
 /// Generate a grid using diamond square algorithm
@@ -64,6 +64,13 @@ impl GridTerrain {
     /// Normalize a value to range [0, 1]
     pub fn get_normed(&self, value: f32) -> f32 {
         (value - self.range.start) / (self.range.end - self.range.start)
+    }
+    /// Normalize a value to range [0, 1]
+    pub fn map_height<F>(&mut self, f: F)
+    where
+        F: Fn(f32) -> f32,
+    {
+        self.grid.iter_mut().for_each(|x| *x = f(*x));
     }
 }
 
