@@ -261,15 +261,21 @@ impl MidpointDisplacement {
         let length = self.get_map_length();
         let mut grid = Array1::zeros((length,));
         for x in (0..length).step_by(step) {
-            grid[[x]] = rng.gen_range(self.range.clone());
+            // SAFETY: x obviously in range
+            unsafe {
+                *grid.uget_mut(x) = rng.gen_range(self.range.clone());
+            }
         }
         for iteration in 0..self.iteration {
             tracing::trace!("Iteration: {}, step: {} in {}", iteration + 1, step, length);
             let half = step / 2;
             for i in (half..length).step_by(step) {
-                let l = grid[[i - half]];
-                let r = grid[[i + half]];
-                grid[[i]] = self.random_average(&mut rng, [l, r]);
+                // SAFETY: left and right must in range
+                unsafe {
+                    let l = *grid.uget(i - half);
+                    let r = *grid.uget(i + half);
+                    *grid.uget_mut(i) = self.random_average(&mut rng, [l, r]);
+                }
             }
             step /= 2;
         }

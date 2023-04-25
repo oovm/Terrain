@@ -1,4 +1,4 @@
-use ndarray::Array2;
+use ndarray::{Array2, ArrayView2};
 use rand::{rngs::SmallRng, Rng, SeedableRng};
 use std::{num::NonZeroUsize, ops::Range};
 
@@ -376,10 +376,12 @@ impl DiamondSquare {
         let mut step = 2usize.pow(self.iteration);
         let (w, h) = self.get_map_size();
         let mut grid = Array2::zeros((w, h));
-        for x in (0..h).step_by(step) {
-            for y in (0..w).step_by(step) {
-                let value = rng.gen_range(self.range.clone());
-                grid[[x, y]] = value;
+        for x in (0..w).step_by(step) {
+            for y in (0..h).step_by(step) {
+                // SAFETY: obviously x and y are in bounds
+                unsafe {
+                    *grid.uget_mut((x, y)) = rng.gen_range(self.range.clone());
+                }
             }
         }
         for iteration in 0..self.iteration {
@@ -418,6 +420,63 @@ impl DiamondSquare {
             step /= 2;
         }
         grid
+    }
+    unsafe fn enlarge_map(&self, matrix: ArrayView2<f32>) -> Array2<f32> {
+        let mut step = 2usize.pow(self.iteration);
+        let w = matrix.shape()[0] * step + 1;
+        let h = matrix.shape()[1] * step + 1;
+        let mut output = Array2::zeros((w, h));
+        // fill the corners
+        for ((x, y), v) in matrix.indexed_iter() {
+            *output.uget_mut((x * step, y * step)) = *v;
+        }
+        // last line is first line,
+        for x in 0..w {
+            *output.uget_mut((x, h - 1)) = *output.uget((x, 0));
+        }
+        // last row is first row
+        for y in 0..h {
+            output[[w - 1, y]] = output[[0, y]];
+        }
+        output
+    }
+
+    pub fn generate_by_array(&self, matrix: ArrayView2<f32>) -> Array2<f32> {
+        let mut rng = SmallRng::seed_from_u64(self.seed);
+        let mut step = 2usize.pow(self.iteration);
+        let w = matrix.shape()[0] * step + 1;
+        let h = matrix.shape()[1] * step + 1;
+        let mut output = Array2::zeros((w, h));
+        // fill the corners
+        for ((x, y), v) in matrix.indexed_iter() {
+            // SAFETY: obviously x and y are in bounds
+            unsafe {
+                *output.uget_mut((x * step, y * step)) = *v;
+            }
+        }
+        // last line is first line, last row is first row
+        for x in 0..w {
+            output[[x, h - 1]] = output[[x, 0]];
+        }
+        for y in 0..h {
+            output[[w - 1, y]] = output[[0, y]];
+        }
+        for iteration in 0..self.iteration {
+            println!("Iteration: {}, step: {} in ({}, {})", iteration + 1, step, w, h);
+            // diamond step
+            let half = step / 2;
+            for i in (half..h).step_by(step) {
+                for j in (half..w).step_by(step) {
+                    // let lu = output[[i - half, j - half]];
+                    // let ru = output[[i - half, j + half]];
+                    // let ld = output[[i + half, j - half]];
+                    // let rd = output[[i + half, j + half]];
+                    // output[[i, j]] = self.random_average(&mut rng, [lu, ru, ld, rd]);
+                }
+            }
+        }
+
+        output
     }
     /// Calculate the average of the given values with random multiplier
     fn random_average(&self, rng: &mut SmallRng, vs: [f32; 4]) -> f32 {

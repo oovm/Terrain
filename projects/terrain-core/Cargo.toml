@@ -25,3 +25,6 @@ path = "../terrain-ds"
 [features]
 default = ["image", "serde"]
 serde = ["dep:serde", "ndarray/serde"]
+
+[package.metadata.docs.rs]
+all-features = true
